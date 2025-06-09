@@ -2,107 +2,51 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chat com Voz - Gemini + ElevenLabs</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    textarea {
-      width: 100%;
-      height: 100px;
-      font-size: 1.1rem;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      cursor: pointer;
-      background-color: #4a90e2;
-      border: none;
-      color: white;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-    button:disabled {
-      background-color: #888;
-      cursor: not-allowed;
-    }
-    #resposta {
-      font-size: 1.1rem;
-      background: #f0f0f0;
-      padding: 15px;
-      border-radius: 6px;
-      min-height: 80px;
-      white-space: pre-wrap;
-      margin-bottom: 20px;
-    }
-    audio {
-      width: 100%;
-      outline: none;
-    }
-  </style>
+  <title>Gemini + ElevenLabs</title>
 </head>
 <body>
-  <h1>Chat com Voz - Gemini + ElevenLabs</h1>
-
-  <textarea id="pergunta" placeholder="Digite sua pergunta aqui..."></textarea>
-  <button id="btnPerguntar">Perguntar</button>
-
-  <div id="resposta"></div>
-
-  <audio id="audioResposta" controls></audio>
+  <h1>Faça sua pergunta:</h1>
+  <input type="text" id="pergunta" placeholder="Digite aqui" />
+  <button onclick="perguntar()">Perguntar</button>
+  <p id="resposta"></p>
+  <audio id="audio" controls autoplay></audio>
 
   <script>
-    const btnPerguntar = document.getElementById('btnPerguntar');
-    const perguntaInput = document.getElementById('pergunta');
-    const respostaDiv = document.getElementById('resposta');
-    const audioResposta = document.getElementById('audioResposta');
+    async function perguntar() {
+      const pergunta = document.getElementById("pergunta").value;
+      const respostaEl = document.getElementById("resposta");
+      const audioEl = document.getElementById("audio");
 
-    btnPerguntar.addEventListener('click', async () => {
-      const pergunta = perguntaInput.value.trim();
       if (!pergunta) {
-        alert('Por favor, digite uma pergunta.');
+        alert("Digite uma pergunta.");
         return;
       }
 
-      btnPerguntar.disabled = true;
-      respostaDiv.textContent = 'Processando...';
-      audioResposta.src = '';
+      respostaEl.textContent = "Carregando resposta...";
 
       try {
-        const response = await fetch('/perguntar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pergunta })
+        const response = await fetch("http://localhost:3000/perguntar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ pergunta }),
         });
 
         if (!response.ok) {
-          throw new Error('Erro na resposta do servidor');
+          throw new Error("Erro ao processar a pergunta.");
         }
 
-        const data = await response.json();
+        const audioBlob = await response.blob();
+        const audioURL = URL.createObjectURL(audioBlob);
+        audioEl.src = audioURL;
 
-        respostaDiv.textContent = data.texto || 'Sem resposta.';
-        // Define o áudio para tocar
-        audioResposta.src = data.audio + '?t=' + new Date().getTime(); // evita cache
-        audioResposta.play();
-
+        respostaEl.textContent = "✅ Áudio recebido com sucesso!";
       } catch (error) {
-        respostaDiv.textContent = 'Erro ao processar a pergunta.';
         console.error(error);
-      } finally {
-        btnPerguntar.disabled = false;
+        respostaEl.textContent = "❌ Erro ao processar a pergunta.";
       }
-    });
+    }
   </script>
 </body>
 </html>
