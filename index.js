@@ -8,7 +8,7 @@ const PORT = 3000;
 
 // 🔑 Configure suas chaves API
 const GEMINI_API_KEY = 'AIzaSyAx8ZN5Pp7yiXIYXJcU42DlbsEU7R80Yug'; // Substitua
-const ELEVEN_API_KEY = 'sk_97d1246acee4554e97a30057eb73a8b9c0772137802d670e'; // Substitua
+const ELEVEN_API_KEY = 'sk_83fccb45d1683081f0fff1900212ef94bdf1042f8074a6fa'; // Substitua
 
 // 🎙️ VOZ FIXA FEMININA PT-BR (Bella)
 const VOZ_FIXA = 'EXAVITQu4vr4xnSDxMaL'; // ID da Bella
