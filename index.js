@@ -81,9 +81,12 @@ app.post('/perguntar', async (req, res) => {
       }
     );
 
-    // 3️⃣ Salva o áudio
-    const audioPath = path.join(__dirname, 'resposta.mp3');
-    fs.writeFileSync(audioPath, ttsResponse.data);
+    res.set({
+  'Content-Type': 'audio/mpeg',
+  'Content-Disposition': 'inline; filename="resposta.mp3"',
+});
+res.send(ttsResponse.data);
+
 
     console.log("[3/3] ✅ Áudio gerado com voz consistente!");
     res.json({ 
