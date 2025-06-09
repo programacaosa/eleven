@@ -1,6 +1,5 @@
 const express = require('express');
 const axios = require('axios');
-const fs = require('fs');
 const cors = require('cors');
 const path = require('path');
 
@@ -18,8 +17,8 @@ const VOZ_FIXA = 'EXAVITQu4vr4xnSDxMaL'; // ID da Bella
 const CONFIG_VOZ = {
   model_id: "eleven_multilingual_v2", // Modelo para PT-BR
   voice_settings: {
-    stability: 0.5,    // Menos robótica
-    similarity_boost: 0.8 // Mantém a voz natural
+    stability: 0.5,          // Menos robótica
+    similarity_boost: 0.8    // Mantém a voz natural
   }
 };
 
@@ -49,10 +48,10 @@ app.post('/perguntar', async (req, res) => {
       {
         contents: [{ parts: [{ text: pergunta }] }],
         generationConfig: {
-          maxOutputTokens: 200 // Respostas curtas
+          maxOutputTokens: 200
         }
       },
-      { 
+      {
         headers: { 'Content-Type': 'application/json' },
         timeout: 8000
       }
@@ -68,7 +67,7 @@ app.post('/perguntar', async (req, res) => {
       `https://api.elevenlabs.io/v1/text-to-speech/${VOZ_FIXA}`,
       {
         text: resposta,
-        ...CONFIG_VOZ // Mesmas configurações sempre
+        ...CONFIG_VOZ
       },
       {
         headers: {
@@ -81,23 +80,18 @@ app.post('/perguntar', async (req, res) => {
       }
     );
 
+    console.log("[3/3] ✅ Enviando áudio direto para o navegador!");
+
     res.set({
-  'Content-Type': 'audio/mpeg',
-  'Content-Disposition': 'inline; filename="resposta.mp3"',
-});
-res.send(ttsResponse.data);
-
-
-    console.log("[3/3] ✅ Áudio gerado com voz consistente!");
-    res.json({ 
-      audio: 'resposta.mp3', 
-      texto: resposta 
+      'Content-Type': 'audio/mpeg',
+      'Content-Disposition': 'inline; filename="resposta.mp3"',
     });
+    res.send(ttsResponse.data);
 
   } catch (err) {
     console.error("🔥 ERRO:", err.message);
-    res.status(500).json({ 
-      error: err.response?.data?.message || 'Erro ao processar.' 
+    res.status(500).json({
+      error: err.response?.data?.message || 'Erro ao processar.'
     });
   }
 });
