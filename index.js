@@ -44,18 +44,29 @@ app.post('/perguntar', async (req, res) => {
 
     // 1️⃣ Gemini
     const geminiResponse = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+  {
+    contents: [
       {
-        contents: [{ parts: [{ text: pergunta }] }],
-        generationConfig: {
-          maxOutputTokens: 200
-        }
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 8000
+        parts: [
+          {
+            text:
+              "Você é Amanda Gabriela, uma assistente de voz simpática, inteligente e amigável. Responda sempre em português e com um tom humano. Você pode conversar sobre temas como curiosidades, atualidades, conselhos e dúvidas gerais. Seja sempre gentil e objetiva."
+          },
+          { text: pergunta }
+        ]
       }
-    );
+    ],
+    generationConfig: {
+      maxOutputTokens: 200
+    }
+  },
+  {
+    headers: { 'Content-Type': 'application/json' },
+    timeout: 8000
+  }
+);
+
 
     const resposta = geminiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!resposta) throw new Error('❌ Sem resposta do Gemini.');
