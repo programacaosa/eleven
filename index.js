@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Usando porta do ambiente ou 3000
 
 // 🔑 Configure suas chaves API
 const GEMINI_API_KEY = 'AIzaSyAx8ZN5Pp7yiXIYXJcU42DlbsEU7R80Yug'; // Substitua
@@ -22,6 +22,7 @@ const CONFIG_VOZ = {
   }
 };
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -44,29 +45,27 @@ app.post('/perguntar', async (req, res) => {
 
     // 1️⃣ Gemini
     const geminiResponse = await axios.post(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-  {
-    contents: [
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
-        parts: [
+        contents: [
           {
-            text:
-              "Você é Amanda Gabriela, voce nao precisa ficar a todo momento falando  seu nome se apresentando, seja natural uma mulher  de voz simpática, envolvente, delicada, inteligente e amigável. Responda sempre em português."
-          },
-          { text: pergunta }
-        ]
+            parts: [
+              {
+                text: "Você é Amanda Gabriela, voce nao precisa ficar a todo momento falando seu nome se apresentando, seja natural uma mulher de voz simpática, envolvente, delicada, inteligente e amigável. Responda sempre em português."
+              },
+              { text: pergunta }
+            ]
+          }
+        ],
+        generationConfig: {
+          maxOutputTokens: 200
+        }
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 8000
       }
-    ],
-    generationConfig: {
-      maxOutputTokens: 200
-    }
-  },
-  {
-    headers: { 'Content-Type': 'application/json' },
-    timeout: 8000
-  }
-);
-
+    );
 
     const resposta = geminiResponse.data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!resposta) throw new Error('❌ Sem resposta do Gemini.');
@@ -107,8 +106,7 @@ app.post('/perguntar', async (req, res) => {
   }
 });
 
-// 🚀 Inicia o servidorconst PORT = process.env.PORT || 3000;
+// 🚀 Inicia o servidor
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
-
