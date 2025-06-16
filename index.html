@@ -49,38 +49,16 @@
       height: 100%;
     }
     
-    /* Chat Area - Ocupa toda a tela em mobile */
+    /* Chat Area */
     .chat-area {
-    position: relative;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Espaço para as mensagens (com scroll) */
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 70px; /* Altura do input */
-  }
-
-  /* Fixa o input na parte inferior */
-  .chat-input {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #f0f2f5;
-    padding: 10px;
-    border-top: 1px solid #e9edef;
-    z-index: 100;
-  }
-
-  /* Ajuste opcional para o input não ficar muito apertado */
-  .chat-input input {
-    padding: 12px 15px;
-  }
-}
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--whatsapp-chat-bg);
+      background-image: url('https://web.whatsapp.com/img/bg-chat-tile-light_a4be512e7195b6b733d9110b408f075d.png');
+      height: 100%;
+      position: relative;
+    }
     
     /* Header */
     .header, .chat-header {
@@ -336,7 +314,16 @@
       }
       
       .chat-input {
-        padding: 6px 8px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 8px 10px;
+        z-index: 100;
+      }
+      
+      .chat-messages {
+        padding-bottom: 70px;
       }
       
       .chat-input input {
@@ -485,7 +472,7 @@
       document.getElementById("pergunta").value = "";
 
       try {
-       const response = await fetch("https://eleven-ww3i.onrender.com/perguntar", {
+        const response = await fetch("https://eleven-ww3i.onrender.com/perguntar", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
