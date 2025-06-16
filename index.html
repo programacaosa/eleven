@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Chat com Amanda</title>
+  <title>Chat com Gemini + ElevenLabs</title>
   <style>
     :root {
       --whatsapp-green: #128C7E;
@@ -29,7 +29,6 @@
       height: 100vh;
       width: 100vw;
       overflow: hidden;
-      position: fixed; /* Impede scroll indesejado em mobile */
     }
     
     /* Container principal */
@@ -156,7 +155,7 @@
       text-overflow: ellipsis;
     }
     
-    /* Chat messages - Área ajustável que não cobre o input */
+    /* Chat messages */
     .chat-messages {
       flex: 1;
       padding: 10px;
@@ -166,10 +165,6 @@
       flex-direction: column;
       background-image: url('https://web.whatsapp.com/img/bg-chat-tile-light_a4be512e7195b6b733d9110b408f075d.png');
       background-attachment: fixed;
-      /* Garante que não cresça indefinidamente */
-      min-height: 0;
-      /* Permite shrink para não cobrir o input */
-      flex-shrink: 1;
     }
     
     .message {
@@ -205,21 +200,17 @@
       margin-left: 8px;
     }
     
-    /* Chat input - Área fixa na parte inferior */
-    .chat-input-container {
+    /* Chat input */
+    .chat-input {
       background-color: #f0f2f5;
       padding: 8px 10px;
       display: flex;
       align-items: center;
       border-top: 1px solid var(--whatsapp-border);
       min-height: 62px;
-      /* Garante que fique sempre visível */
-      position: sticky;
-      bottom: 0;
-      z-index: 5;
     }
     
-    .chat-input {
+    .chat-input input {
       flex: 1;
       padding: 10px 12px;
       border: none;
@@ -227,10 +218,9 @@
       margin: 0 8px;
       font-size: 15px;
       outline: none;
-      background-color: white;
     }
     
-    .send-button {
+    .chat-input button {
       background-color: var(--whatsapp-green);
       color: white;
       border: none;
@@ -244,7 +234,7 @@
       cursor: pointer;
     }
     
-    .send-button:active {
+    .chat-input button:active {
       background-color: var(--whatsapp-teal-green);
       transform: scale(0.95);
     }
@@ -322,28 +312,18 @@
         font-size: 14px;
       }
       
-      .chat-input-container {
+      .chat-input {
         padding: 6px 8px;
-        /* Ajuste para mobile */
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
       }
       
-      .chat-input {
+      .chat-input input {
         padding: 8px 12px;
         font-size: 14px;
       }
       
-      .send-button {
+      .chat-input button {
         width: 36px;
         height: 36px;
-      }
-      
-      /* Ajuste da área de mensagens para considerar o input fixo */
-      .chat-messages {
-        padding-bottom: 70px; /* Altura aproximada do input */
       }
     }
     
@@ -363,14 +343,6 @@
       
       .message {
         max-width: 90%;
-      }
-      
-      .chat-input-container {
-        min-height: 56px;
-      }
-      
-      .chat-messages {
-        padding-bottom: 65px;
       }
     }
   </style>
@@ -427,16 +399,16 @@
       
       <div class="chat-messages" id="chat-messages">
         <div class="message incoming">
-          Olá! vamos conversar unas conversas bem picantes?
+          Oii, como vai? Vamos converar srsrs.
           <div class="message-time">12:34</div>
         </div>
       </div>
       
-      <div class="chat-input-container">
+      <div class="chat-input">
         <span class="emoji-picker">😊</span>
         <span class="attach-button">📎</span>
-        <input type="text" id="pergunta" placeholder="Digite uma mensagem" class="chat-input" />
-        <button class="send-button" onclick="perguntar()">➤</button>
+        <input type="text" id="pergunta" placeholder="Digite uma mensagem" />
+        <button onclick="perguntar()">➤</button>
       </div>
     </div>
   </div>
@@ -468,10 +440,6 @@
       if (window.innerWidth <= 768) {
         toggleSidebar();
       }
-      // Foca automaticamente no campo de entrada
-      setTimeout(() => {
-        document.getElementById('pergunta').focus();
-      }, 300);
     }
     
     // Enviar mensagem
@@ -576,10 +544,7 @@
     
     function scrollToBottom() {
       const chatMessages = document.getElementById("chat-messages");
-      // Pequeno delay para garantir que o DOM foi atualizado
-      setTimeout(() => {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 50);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
     function getCurrentTime() {
@@ -595,11 +560,6 @@
       }
     });
     
-    // Focar no input quando a tela de chat for aberta
-    document.getElementById('chat-area').addEventListener('click', function() {
-      document.getElementById('pergunta').focus();
-    });
-    
     // Verificar se é mobile no carregamento
     window.addEventListener('load', function() {
       if (window.innerWidth <= 768) {
@@ -609,9 +569,6 @@
         document.getElementById('sidebar').classList.remove('hidden');
         currentView = 'both';
       }
-      
-      // Ajustar altura da área de mensagens
-      adjustMessagesHeight();
     });
     
     // Ajustar ao redimensionar a tela
@@ -624,19 +581,7 @@
         document.getElementById('sidebar').classList.add('hidden');
         currentView = 'chat';
       }
-      
-      adjustMessagesHeight();
     });
-    
-    // Ajustar a altura da área de mensagens para não cobrir o input
-    function adjustMessagesHeight() {
-      if (window.innerWidth <= 768) {
-        const inputHeight = document.querySelector('.chat-input-container').offsetHeight;
-        document.getElementById('chat-messages').style.paddingBottom = inputHeight + 'px';
-      } else {
-        document.getElementById('chat-messages').style.paddingBottom = '10px';
-      }
-    }
   </script>
 </body>
 </html>
