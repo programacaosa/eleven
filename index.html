@@ -2,27 +2,464 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Gemini + ElevenLabs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Chat com Gemini + ElevenLabs</title>
+  <style>
+    :root {
+      --whatsapp-green: #128C7E;
+      --whatsapp-light-green: #25D366;
+      --whatsapp-teal-green: #075E54;
+      --whatsapp-chat-bg: #e5ddd5;
+      --whatsapp-outgoing-bg: #DCF8C6;
+      --whatsapp-incoming-bg: #FFFFFF;
+      --whatsapp-timestamp: #667781;
+      --whatsapp-border: #e9edef;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      background-color: #f0f2f5;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+    
+    /* Container principal */
+    .app-container {
+      display: flex;
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+    
+    /* Sidebar - Visível apenas em desktop */
+    .sidebar {
+      width: 30%;
+      background-color: white;
+      border-right: 1px solid var(--whatsapp-border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    /* Chat Area - Ocupa toda a tela em mobile */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--whatsapp-chat-bg);
+      background-image: url('https://web.whatsapp.com/img/bg-chat-tile-light_a4be512e7195b6b733d9110b408f075d.png');
+      height: 100%;
+    }
+    
+    /* Header */
+    .header, .chat-header {
+      background-color: var(--whatsapp-teal-green);
+      color: white;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 60px;
+    }
+    
+    .chat-header {
+      position: relative;
+      z-index: 10;
+    }
+    
+    .back-button {
+      display: none;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    
+    .header h2, .chat-header-info {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    /* Search bar */
+    .search-bar {
+      padding: 8px;
+      background-color: #f0f2f5;
+      border-bottom: 1px solid var(--whatsapp-border);
+    }
+    
+    .search-bar input {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: white;
+      font-size: 14px;
+    }
+    
+    /* Contact list */
+    .contact-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .contact {
+      display: flex;
+      padding: 12px;
+      border-bottom: 1px solid var(--whatsapp-border);
+      cursor: pointer;
+    }
+    
+    .contact:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .contact-avatar, .chat-header-avatar {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      background-color: #ddd;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #555;
+    }
+    
+    .contact-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .contact-name {
+      font-weight: 600;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .contact-last-msg {
+      font-size: 13px;
+      color: #667781;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Chat messages */
+    .chat-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      flex-direction: column;
+      background-image: url('https://web.whatsapp.com/img/bg-chat-tile-light_a4be512e7195b6b733d9110b408f075d.png');
+      background-attachment: fixed;
+    }
+    
+    .message {
+      max-width: 80%;
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      position: relative;
+      word-wrap: break-word;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+    
+    .outgoing {
+      align-self: flex-end;
+      background-color: var(--whatsapp-outgoing-bg);
+      border-top-right-radius: 0;
+    }
+    
+    .incoming {
+      align-self: flex-start;
+      background-color: var(--whatsapp-incoming-bg);
+      border-top-left-radius: 0;
+    }
+    
+    .message-time {
+      font-size: 11px;
+      color: var(--whatsapp-timestamp);
+      text-align: right;
+      margin-top: 4px;
+      display: inline-block;
+      float: right;
+      margin-left: 8px;
+    }
+    
+    /* Chat input */
+    .chat-input {
+      background-color: #f0f2f5;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid var(--whatsapp-border);
+      min-height: 62px;
+    }
+    
+    .chat-input input {
+      flex: 1;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 20px;
+      margin: 0 8px;
+      font-size: 15px;
+      outline: none;
+    }
+    
+    .chat-input button {
+      background-color: var(--whatsapp-green);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .chat-input button:active {
+      background-color: var(--whatsapp-teal-green);
+      transform: scale(0.95);
+    }
+    
+    .emoji-picker, .attach-button {
+      margin: 0 5px;
+      cursor: pointer;
+      font-size: 24px;
+      color: var(--whatsapp-teal-green);
+    }
+    
+    /* Audio control (hidden) */
+    .audio-control {
+      display: none;
+    }
+    
+    /* Typing animation */
+    .typing-animation {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+    }
+    
+    .typing-animation span {
+      width: 8px;
+      height: 8px;
+      margin: 0 2px;
+      background-color: #9E9E9E;
+      border-radius: 50%;
+      display: inline-block;
+      animation: bounce 1.5s infinite ease-in-out;
+    }
+    
+    .typing-animation span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .typing-animation span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 20;
+        transition: transform 0.3s ease;
+      }
+      
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+      
+      .back-button {
+        display: block;
+      }
+      
+      .contact-avatar, .chat-header-avatar {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        font-size: 14px;
+      }
+      
+      .message {
+        max-width: 85%;
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+      
+      .chat-input {
+        padding: 6px 8px;
+      }
+      
+      .chat-input input {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+      
+      .chat-input button {
+        width: 36px;
+        height: 36px;
+      }
+    }
+    
+    /* Ajustes para telas muito pequenas */
+    @media (max-width: 400px) {
+      .header h2, .chat-header-info {
+        font-size: 16px;
+      }
+      
+      .contact-name {
+        font-size: 14px;
+      }
+      
+      .contact-last-msg {
+        font-size: 12px;
+      }
+      
+      .message {
+        max-width: 90%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Faça sua pergunta:</h1>
-  <input type="text" id="pergunta" placeholder="Digite aqui" />
-  <button onclick="perguntar()">Perguntar</button>
-  <p id="resposta"></p>
-  <audio id="audio" controls autoplay></audio>
+  <div class="app-container">
+    <!-- Sidebar (lista de contatos) -->
+    <div class="sidebar hidden" id="sidebar">
+      <div class="header">
+        <h2>Chats</h2>
+        <div>
+          <span style="margin-right: 15px; cursor: pointer;">📝</span>
+          <span style="cursor: pointer;">⚙️</span>
+        </div>
+      </div>
+      
+      <div class="search-bar">
+        <input type="text" placeholder="Pesquisar ou começar uma nova conversa">
+      </div>
+      
+      <div class="contact-list">
+        <div class="contact active" onclick="openChat()">
+          <div class="contact-avatar">AI</div>
+          <div class="contact-info">
+            <div class="contact-name">Gemini Assistant</div>
+            <div class="contact-last-msg">Clique para conversar</div>
+          </div>
+        </div>
+        
+        <div class="contact" onclick="openChat()">
+          <div class="contact-avatar">JS</div>
+          <div class="contact-info">
+            <div class="contact-name">Suporte Técnico</div>
+            <div class="contact-last-msg">Como podemos ajudar?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Área de chat (visível por padrão em mobile) -->
+    <div class="chat-area" id="chat-area">
+      <div class="chat-header">
+        <div class="back-button" onclick="toggleSidebar()">←</div>
+        <div class="chat-header-avatar">AI</div>
+        <div class="chat-header-info">
+          <div class="chat-header-name">Gemini Assistant</div>
+          <div class="chat-header-status">Online</div>
+        </div>
+        <div>
+          <span style="margin-right: 15px; cursor: pointer;">🔍</span>
+          <span style="cursor: pointer;">⋮</span>
+        </div>
+      </div>
+      
+      <div class="chat-messages" id="chat-messages">
+        <div class="message incoming">
+          Olá! Sou o Gemini Assistant. Como posso te ajudar hoje?
+          <div class="message-time">12:34</div>
+        </div>
+      </div>
+      
+      <div class="chat-input">
+        <span class="emoji-picker">😊</span>
+        <span class="attach-button">📎</span>
+        <input type="text" id="pergunta" placeholder="Digite uma mensagem" />
+        <button onclick="perguntar()">➤</button>
+      </div>
+    </div>
+  </div>
+  
+  <audio id="audio" class="audio-control" controls></audio>
 
   <script>
+    // Variável de estado
+    let currentView = 'chat';
+    
+    // Alternar entre sidebar e chat em mobile
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const chatArea = document.getElementById('chat-area');
+      
+      if (currentView === 'chat') {
+        sidebar.classList.remove('hidden');
+        chatArea.style.display = 'none';
+        currentView = 'contacts';
+      } else {
+        sidebar.classList.add('hidden');
+        chatArea.style.display = 'flex';
+        currentView = 'chat';
+      }
+    }
+    
+    // Abrir chat a partir da lista de contatos
+    function openChat() {
+      if (window.innerWidth <= 768) {
+        toggleSidebar();
+      }
+    }
+    
+    // Enviar mensagem
     async function perguntar() {
       const pergunta = document.getElementById("pergunta").value;
-      const respostaEl = document.getElementById("resposta");
+      const chatMessages = document.getElementById("chat-messages");
       const audioEl = document.getElementById("audio");
 
-      if (!pergunta) {
-        alert("Digite uma pergunta.");
+      if (!pergunta.trim()) {
         return;
       }
 
-      respostaEl.textContent = "Carregando resposta...";
+      // Adiciona mensagem do usuário
+      addMessage(pergunta, 'outgoing');
+      
+      // Adiciona mensagem de carregamento
+      const loadingId = addLoadingMessage();
+      
+      // Limpa o input
+      document.getElementById("pergunta").value = "";
 
       try {
         const response = await fetch("http://localhost:3000/perguntar", {
@@ -37,16 +474,114 @@
           throw new Error("Erro ao processar a pergunta.");
         }
 
+        // Remove a mensagem de carregamento
+        removeLoadingMessage(loadingId);
+        
         const audioBlob = await response.blob();
         const audioURL = URL.createObjectURL(audioBlob);
         audioEl.src = audioURL;
-
-        respostaEl.textContent = "✅ Áudio recebido com sucesso!";
+        
+        // Adiciona mensagem de confirmação
+        addMessage("✅ Resposta em áudio recebida (reprodução automática)", 'incoming');
+        
+        // Reproduz o áudio automaticamente
+        audioEl.play().catch(e => console.log("Auto-play prevented: ", e));
+        
       } catch (error) {
         console.error(error);
-        respostaEl.textContent = "❌ Erro ao processar a pergunta.";
+        
+        // Remove a mensagem de carregamento
+        removeLoadingMessage(loadingId);
+        
+        // Adiciona mensagem de erro
+        addMessage("❌ Ocorreu um erro ao processar sua mensagem", 'incoming');
       }
     }
+    
+    // Funções auxiliares para manipulação de mensagens
+    function addMessage(text, type) {
+      const chatMessages = document.getElementById("chat-messages");
+      
+      const message = document.createElement("div");
+      message.className = `message ${type}`;
+      message.innerHTML = `
+        ${text}
+        <div class="message-time">${getCurrentTime()}</div>
+      `;
+      chatMessages.appendChild(message);
+      scrollToBottom();
+    }
+    
+    function addLoadingMessage() {
+      const chatMessages = document.getElementById("chat-messages");
+      const id = 'loading-' + Date.now();
+      
+      const message = document.createElement("div");
+      message.className = "message incoming";
+      message.id = id;
+      message.innerHTML = `
+        <div style="display: flex; align-items: center;">
+          <div class="typing-animation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <div class="message-time">${getCurrentTime()}</div>
+      `;
+      chatMessages.appendChild(message);
+      scrollToBottom();
+      
+      return id;
+    }
+    
+    function removeLoadingMessage(id) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.remove();
+      }
+    }
+    
+    function scrollToBottom() {
+      const chatMessages = document.getElementById("chat-messages");
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function getCurrentTime() {
+      const now = new Date();
+      return now.getHours().toString().padStart(2, '0') + ':' + 
+             now.getMinutes().toString().padStart(2, '0');
+    }
+    
+    // Event listeners
+    document.getElementById("pergunta").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        perguntar();
+      }
+    });
+    
+    // Verificar se é mobile no carregamento
+    window.addEventListener('load', function() {
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.add('hidden');
+        currentView = 'chat';
+      } else {
+        document.getElementById('sidebar').classList.remove('hidden');
+        currentView = 'both';
+      }
+    });
+    
+    // Ajustar ao redimensionar a tela
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('hidden');
+        document.getElementById('chat-area').style.display = 'flex';
+        currentView = 'both';
+      } else if (currentView === 'both') {
+        document.getElementById('sidebar').classList.add('hidden');
+        currentView = 'chat';
+      }
+    });
   </script>
 </body>
 </html>
