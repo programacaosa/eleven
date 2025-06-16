@@ -49,15 +49,31 @@
       height: 100%;
     }
     
-    /* Chat Area - Ocupa toda a tela em mobile */
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background-color: var(--whatsapp-chat-bg);
-      background-image: url('https://web.whatsapp.com/img/bg-chat-tile-light_a4be512e7195b6b733d9110b408f075d.png');
-      height: 100%;
-    }
+   
+    /* Ajustes para o chat-input em mobile */
+@media (max-width: 768px) {
+  .chat-area {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 62px; /* Altura do chat-input */
+  }
+  
+  .chat-input {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #f0f2f5;
+    z-index: 100;
+  }
+}
     
     /* Header */
     .header, .chat-header {
